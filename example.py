@@ -1,31 +1,22 @@
 from pygui import pygui
+from pygui.guiprofile import *
+from pygui.good_tuple import mtuple
 from pygui.color import color
 import time
+
     
 gui = pygui.window(suppress = True)
+    
 gui.override_all(suppress = True)
 gui.on_user_quit = gui.quit
 
-gui.set_fps(60)
-gui.set_size((100,100))
+gui.set_fps(512)
+gui.set_size((500,500))
 
-gui.wait_until_ready()
-print("ready!")
+rad = gui.add_radio(position = (10,30))
+rad.set_title("My radio:")
+rad.set_options(["Option 1", "Option 2"])
 
-time.sleep(1)
-
-gui.set_background_color(color(255,255,255))
-time.sleep(1)
-
-gui.set_background_color(color(255,127,0))
-time.sleep(1)
-gui.set_size((500,100))
-
-gui.set_background_color(color(127,0,0))
-time.sleep(1)
-
-gui.set_background_color(color(0,0,0))
-time.sleep(1)
-
+gui.wait_for_frame()
 
 gui.wait_until_quit()
