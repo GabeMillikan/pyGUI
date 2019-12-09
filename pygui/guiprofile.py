@@ -28,6 +28,9 @@ class poly(BaseElement):
         self.closed = closed
         self.width  = width
         
+    def get_points_for_draw(self):
+        return [mtuple(a).rounded().tuple() for a in self.points]
+        
 class circle(BaseElement):
     def __init__(self, origin, radius, clr, width, aa = False):
         self.origin = origin
@@ -165,6 +168,75 @@ class radio(HigherElement):
     def on_selection_changed(self, newselection):
         print("radio.on_selection_changed(" + str(newselection) + ") was called, handle me!")
         
+class button(HigherElement):   
+    def __init__(self, position, size, label):
+        self.font_size = 15
+        self.font = "Consolas"
+        self.position = position
+        self.size = size
+        self.label = label
+        
+        self.background_color = color.lightgray()
+        self.outline_color = color.darkgray()
+        self.border_width = 2
+        self.font_color = color(25,25,25)
+        self.label_offset = ( mtuple(size) / 2).tuple()
+        
+        self.elements = []
+        self.build()
+        
+    def set_rect(self, pos, size):
+        self.position = pos
+        self.size = size
+        self.build()
+        
+    def set_label(self, txt, font_size, label_offset, font_color, font = "Consolas"):
+        self.label = txt
+        self.font_size = font_size
+        self.label_offset = label_offset
+        self.font_color = font_color
+        self.font = font
+        self.build()
+        
+    def set_background_color(self, c):
+        self.background_color = c
+        self.build()
+        
+    def set_border(self, width, clr):
+        self.border_width = width
+        self.outline_color = clr
+        self.build()
+        
+    def on_click(self):
+        print("Default button.on_click()... Overrride me!")
+        
+    def build(self):
+        self.elements = []
+        #border
+        self.elements.append(
+            poly(
+                [self.position,
+                (self.position[0] + self.size[0], self.position[1]),
+                (mtuple(self.position) + mtuple(self.size)).tuple(),
+                (self.position[0], self.position[1] + self.size[1])
+                ],
+                self.outline_color, True, self.border_width)
+            )
+        #background
+        self.elements.append(
+            poly(
+                [self.position,
+                (self.position[0] + self.size[0], self.position[1]),
+                (mtuple(self.position) + mtuple(self.size)).tuple(),
+                (self.position[0], self.position[1] + self.size[1])
+                ],
+                self.background_color, True, 0)
+        )
+        #label
+        self.elements.append(
+            text(txt = self.label, position = (mtuple(self.position)+mtuple(self.label_offset)).tuple(), font = self.font, size = self.font_size, clr = self.font_color)
+        )
+        
         
 class guiprofile:
     def __init__(self):
@@ -187,6 +259,11 @@ class guiprofile:
         
     def draw_circle(self, origin, radius, clr = color.black(), width = 1):
         new = circle(origin, radius, clr, width)
+        self.renderqueue.append(new)
+        return new
+        
+    def draw_button(self, position = (0,0), size = (20,10), label = "Button"):
+        new = button(position, size, label)
         self.renderqueue.append(new)
         return new
         

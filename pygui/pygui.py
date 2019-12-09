@@ -71,6 +71,10 @@ class window:
                                 #selected new option
                                 elem.set_selected(i)
                                 threading.Thread(target = elem.on_selection_changed, args = ([i])).start()
+            if isinstance(elem, button):
+                if (elem.position[0]) < x < (elem.position[0] + elem.size[0]):
+                    if (elem.position[1]) < y < (elem.position[1] + elem.size[1]): 
+                        threading.Thread(target = elem.on_click).start()
         
     def _disp_thread(self):
         #get pygame
@@ -87,7 +91,7 @@ class window:
         #print things that werent part of pygame
         outputtrap = outputtrap.getvalue().split("\n")
         for l in outputtrap:
-            if l.find("pygame") < 0:
+            if (l.find("pygame") < 0) and len(l) > 5:
                 print(l)
         outputtrap = None
         #set loadstatus
@@ -149,7 +153,10 @@ class window:
                         
                     #draw polygon
                     if isinstance(element, poly):
-                        pygame.draw.lines(background, element.color.rounded().tuple(), element.closed.rounded().tuple(), element.get_points_for_draw(), element.width);
+                        if element.width > 0:
+                            pygame.draw.lines(background, element.color.rounded().tuple(), element.closed, element.get_points_for_draw(), element.width)
+                        else:
+                            pygame.gfxdraw.filled_polygon(background, element.get_points_for_draw(), element.color.rounded().tuple())
                         
                     #draw circle
                     if isinstance(element, circle): 
@@ -209,6 +216,9 @@ class window:
     def add_poly(self, points, clr = color.black(), closed = False, width = 1):
         return self.profile.draw_poly(points, clr, closed = closed, width = width)
         
+    def add_button(self, position = (0,0), size = (20,10), label = "Button"):
+        return self.profile.draw_button(position = position, size = size, label = label)
+        
     def add_outlined_rect(self, start, size, clr = color.black(), width = 1):
         return self.add_poly(
                             [start,
@@ -240,6 +250,8 @@ class window:
         
     def override_all(self, suppress = False):
         radio.on_selection_changed = self._do_nothing
+        button.on_click = self._do_nothing
+        
         self.on_frame_render = self._do_nothing
         self.on_user_quit = self._do_nothing
         
